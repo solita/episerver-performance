@@ -54,7 +54,7 @@ namespace Solita.Episerver.Performance.Routing
             // check if RequestSegmentContext.CurrentContextMode is Default. 
             // This handles all the valid use cases in edit and preview modes.
             return (RequestSegmentContext.CurrentContextMode == ContextMode.Default) &&
-                   (args == null || args.ContextMode == ContextMode.Default);
+                   (args == null || args.ContextMode == ContextMode.Default || args.ContextMode == ContextMode.Undefined);
         }
 
         private static string CreateCacheKey(ContentReference contentLink, string language, VirtualPathArguments args)
