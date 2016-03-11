@@ -1,14 +1,14 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web;
-using System.Web.Caching;
 using System.Web.Routing;
 using EPiServer;
 using EPiServer.Core;
+using EPiServer.Framework.Cache;
 using EPiServer.Globalization;
 using EPiServer.Web;
 using EPiServer.Web.Routing;
 using EPiServer.Web.Routing.Segments;
-using Solita.Episerver.Performance.Helpers;
 
 namespace Solita.Episerver.Performance.Routing
 {
@@ -19,16 +19,17 @@ namespace Solita.Episerver.Performance.Routing
     public class CachingUrlResolver : DefaultUrlResolver
     {
         private const int CacheTimeSeconds = 3600;
-        private static Cache Cache => HttpRuntime.Cache;
+        private static IObjectInstanceCache _cache;
 
         public CachingUrlResolver(RouteCollection routes,
                                   IContentLoader contentLoader,
                                   SiteDefinitionRepository siteDefinitionRepository,
                                   TemplateResolver templateResolver,
-                                  IPermanentLinkMapper permanentLinkMapper)
+                                  IPermanentLinkMapper permanentLinkMapper,
+                                  IObjectInstanceCache cache)
             : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper)
         {
-
+            _cache = cache;
         }
 
         public override VirtualPathData GetVirtualPath(ContentReference contentLink, string language, VirtualPathArguments args)
@@ -37,12 +38,25 @@ namespace Solita.Episerver.Performance.Routing
             {
                 return base.GetVirtualPath(contentLink, language, args);
             }
-            
-            var key = CreateCacheKey(contentLink, language, args);
-            return CacheUtil.GetOrStoreUsingDatafactoryDependency(Cache, key, CacheTimeSeconds, () => base.GetVirtualPath(contentLink, language, args));
+
+            var cachekey = CreateCacheKey(contentLink, language, args);
+            var value = _cache.Get(cachekey) as VirtualPathData;
+
+            if (value == null)
+            {
+                value = base.GetVirtualPath(contentLink, language, args);
+
+                if (value != null)
+                {
+                    var evictionPolicy = new CacheEvictionPolicy(new[] { DataFactoryCache.VersionKey }, TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute);
+                    _cache.Insert(cachekey, value, evictionPolicy);
+                }
+            }
+
+            return value;
         }
-        
-        private static bool IgnoreCache(ContentReference contentLink,  VirtualPathArguments args)
+
+        private static bool IgnoreCache(ContentReference contentLink, VirtualPathArguments args)
         {
             // Cache only in Default context mode, i.e. only for end users, not for edit or preview mode
             return HttpContext.Current == null || contentLink == null || !IsDefaultContextActive(args);

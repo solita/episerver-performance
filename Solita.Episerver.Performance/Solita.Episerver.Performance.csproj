@@ -151,7 +151,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\CacheUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing\CachingUrlResolver.cs" />
     <Compile Include="Search\NonFileIndexingSearchHandler.cs" />
