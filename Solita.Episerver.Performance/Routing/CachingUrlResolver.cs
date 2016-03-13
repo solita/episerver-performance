@@ -48,8 +48,7 @@ namespace Solita.Episerver.Performance.Routing
 
                 if (value != null)
                 {
-                    var evictionPolicy = new CacheEvictionPolicy(new[] { DataFactoryCache.VersionKey }, TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute);
-                    _cache.Insert(cachekey, value, evictionPolicy);
+                    _cache.Insert(cachekey, value, CreateCacheEvictionPolicy());
                 }
             }
 
@@ -69,6 +68,16 @@ namespace Solita.Episerver.Performance.Routing
             // This handles all the valid use cases in edit and preview modes.
             return (RequestSegmentContext.CurrentContextMode == ContextMode.Default) &&
                    (args == null || args.ContextMode == ContextMode.Default || args.ContextMode == ContextMode.Undefined);
+        }
+
+        private static CacheEvictionPolicy CreateCacheEvictionPolicy()
+        {
+            // DataFactoryCache.VersionKey must exists in the cache. Otherwise the entries are not cached. 
+            // The key is removed when a remote server content is updated. 
+            // Version call ensures that the key is present
+            var version = DataFactoryCache.Version;
+            
+            return new CacheEvictionPolicy(new[] { DataFactoryCache.VersionKey }, TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute);
         }
 
         private static string CreateCacheKey(ContentReference contentLink, string language, VirtualPathArguments args)
