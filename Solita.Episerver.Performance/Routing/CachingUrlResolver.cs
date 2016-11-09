@@ -8,7 +8,8 @@ using EPiServer.Framework.Cache;
 using EPiServer.Globalization;
 using EPiServer.Web;
 using EPiServer.Web.Routing;
-using EPiServer.Web.Routing.Segments;
+using EPiServer.Web.Routing.Internal;
+using EPiServer.Web.Routing.Segments.Internal;
 
 namespace Solita.Episerver.Performance.Routing
 {
@@ -20,16 +21,20 @@ namespace Solita.Episerver.Performance.Routing
     {
         private const int CacheTimeSeconds = 3600;
         private static IObjectInstanceCache _cache;
+        private readonly string _cacheVersionKey;
 
         public CachingUrlResolver(RouteCollection routes,
                                   IContentLoader contentLoader,
-                                  SiteDefinitionRepository siteDefinitionRepository,
+                                  ISiteDefinitionRepository siteDefinitionRepository,
                                   TemplateResolver templateResolver,
                                   IPermanentLinkMapper permanentLinkMapper,
+                                  IContentLanguageSettingsHandler contentLanguageSettingsHandler,
+                                  IContentCacheKeyCreator cacheKeyCreator,
                                   IObjectInstanceCache cache)
-            : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper)
+            : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper, contentLanguageSettingsHandler)
         {
             _cache = cache;
+            _cacheVersionKey = cacheKeyCreator.VersionKey;
         }
 
         public override VirtualPathData GetVirtualPath(ContentReference contentLink, string language, VirtualPathArguments args)
@@ -70,14 +75,9 @@ namespace Solita.Episerver.Performance.Routing
                    (args == null || args.ContextMode == ContextMode.Default || args.ContextMode == ContextMode.Undefined);
         }
 
-        private static CacheEvictionPolicy CreateCacheEvictionPolicy()
+        private CacheEvictionPolicy CreateCacheEvictionPolicy()
         {
-            // DataFactoryCache.VersionKey must exists in the cache. Otherwise the entries are not cached. 
-            // The key is removed when a remote server content is updated. 
-            // Version call ensures that the key is present
-            var version = DataFactoryCache.Version;
-            
-            return new CacheEvictionPolicy(new[] { DataFactoryCache.VersionKey }, TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute);
+            return new CacheEvictionPolicy(TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute, new[] { _cacheVersionKey });
         }
 
         private static string CreateCacheKey(ContentReference contentLink, string language, VirtualPathArguments args)

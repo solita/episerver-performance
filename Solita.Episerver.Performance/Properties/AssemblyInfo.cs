@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Solita.Episerver.Performance")]
-[assembly: AssemblyDescription("Performance hacks for Episerver 9")]
+[assembly: AssemblyDescription("Performance hacks for Episerver")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Solita Oy")]
 [assembly: AssemblyProduct("Solita.Episerver.Performance")]
