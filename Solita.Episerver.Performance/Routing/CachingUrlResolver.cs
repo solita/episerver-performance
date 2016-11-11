@@ -9,6 +9,7 @@ using EPiServer.Globalization;
 using EPiServer.Web;
 using EPiServer.Web.Routing;
 using EPiServer.Web.Routing.Internal;
+using EPiServer.Web.Routing.Segments;
 using EPiServer.Web.Routing.Segments.Internal;
 
 namespace Solita.Episerver.Performance.Routing
@@ -21,6 +22,7 @@ namespace Solita.Episerver.Performance.Routing
     {
         private const int CacheTimeSeconds = 3600;
         private static IObjectInstanceCache _cache;
+        private readonly IContentCacheVersion _cacheVersion;
         private readonly string _cacheVersionKey;
 
         public CachingUrlResolver(RouteCollection routes,
@@ -30,10 +32,12 @@ namespace Solita.Episerver.Performance.Routing
                                   IPermanentLinkMapper permanentLinkMapper,
                                   IContentLanguageSettingsHandler contentLanguageSettingsHandler,
                                   IContentCacheKeyCreator cacheKeyCreator,
+                                  IContentCacheVersion cacheVersion,
                                   IObjectInstanceCache cache)
             : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper, contentLanguageSettingsHandler)
         {
             _cache = cache;
+            _cacheVersion = cacheVersion;
             _cacheVersionKey = cacheKeyCreator.VersionKey;
         }
 
@@ -60,8 +64,13 @@ namespace Solita.Episerver.Performance.Routing
             return value;
         }
 
-        private static bool IgnoreCache(ContentReference contentLink, VirtualPathArguments args)
+        private bool IgnoreCache(ContentReference contentLink, VirtualPathArguments args)
         {
+            // "DataFactoryCache.Version" key must exists in the cache. Otherwise the entries are not cached. 
+            // The key is removed when a remote server content is updated. 
+            // Version call ensures that the key is present
+            var version = _cacheVersion.Version;
+
             // Cache only in Default context mode, i.e. only for end users, not for edit or preview mode
             return HttpContext.Current == null || contentLink == null || !IsDefaultContextActive(args);
         }
