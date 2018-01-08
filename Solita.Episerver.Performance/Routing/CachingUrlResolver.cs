@@ -9,7 +9,6 @@ using EPiServer.Globalization;
 using EPiServer.Web;
 using EPiServer.Web.Routing;
 using EPiServer.Web.Routing.Internal;
-using EPiServer.Web.Routing.Segments;
 using EPiServer.Web.Routing.Segments.Internal;
 
 namespace Solita.Episerver.Performance.Routing
