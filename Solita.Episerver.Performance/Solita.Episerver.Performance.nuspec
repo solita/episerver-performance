@@ -13,13 +13,13 @@
     <projectUrl>https://deus.solita.fi/Solita/projects/episerver/repositories/solita-episerver-performance</projectUrl>
     <iconUrl>http://epijenkins.solita.fi/Assets/solita.png</iconUrl>
     <dependencies>
-      <dependency id="EPiServer.CMS.Core" version="[10.0, 11.0)" />
+      <dependency id="EPiServer.CMS.Core" version="[11.1, 12.0)" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\Solita.Episerver.Performance.dll" target="lib\net45\Solita.Episerver.Performance.dll" />
-    <file src="bin\Release\Solita.Episerver.Performance.pdb" target="lib\net45\Solita.Episerver.Performance.pdb" />
-    <file src="bin\Release\Solita.Episerver.Performance.xml" target="lib\net45\Solita.Episerver.Performance.xml" />
+    <file src="bin\Release\Solita.Episerver.Performance.dll" target="lib\net461\Solita.Episerver.Performance.dll" />
+    <file src="bin\Release\Solita.Episerver.Performance.pdb" target="lib\net461\Solita.Episerver.Performance.pdb" />
+    <file src="bin\Release\Solita.Episerver.Performance.xml" target="lib\net461\Solita.Episerver.Performance.xml" />
     <file src="**\*.cs" target="src" />
   </files>
 </package>
