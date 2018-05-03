@@ -92,10 +92,11 @@ namespace Solita.Episerver.Performance.Routing
         {
             // Default to PreferredCulture when explicit value is empty
             var activeLanguage = !string.IsNullOrEmpty(language) ? language : ContentLanguage.PreferredCulture.Name;
-            // URLs are startpage relative
-            var startPageLink = ContentReference.StartPage ?? PageReference.EmptyReference;
 
-            var key = "Solita:CachingUrlResolver.GetVirtualPath" + $"/{activeLanguage}/{startPageLink}/{contentLink}";
+            // URLs are host name relative. A single site can have multiple host names defined.
+            var host = HttpContext.Current.Request.Url.Host;
+
+            var key = "Solita:CachingUrlResolver.GetVirtualPath" + $"/{activeLanguage}/{host}/{contentLink}";
 
             // RouteValues contain segments for partial routers. These must be included in the key
             if (args?.RouteValues != null && args.RouteValues.Any())
