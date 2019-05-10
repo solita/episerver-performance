@@ -56,7 +56,8 @@ namespace Solita.Episerver.Performance.Routing
 
                 if (value != null)
                 {
-                    _cache.Insert(cachekey, value, CreateCacheEvictionPolicy());
+                    var masterCacheKey = CreateMasterCacheKey(contentLink);
+                    _cache.Insert(cachekey, value, CreateCacheEvictionPolicy(masterCacheKey));
                 }
             }
 
@@ -83,9 +84,9 @@ namespace Solita.Episerver.Performance.Routing
                    (args == null || args.ContextMode == ContextMode.Default || args.ContextMode == ContextMode.Undefined);
         }
 
-        private CacheEvictionPolicy CreateCacheEvictionPolicy()
+        private CacheEvictionPolicy CreateCacheEvictionPolicy(string masterCacheKey)
         {
-            return new CacheEvictionPolicy(TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute, new[] { _cacheVersionKey });
+            return new CacheEvictionPolicy(TimeSpan.FromSeconds(CacheTimeSeconds), CacheTimeoutType.Absolute, new[] { _cacheVersionKey }, new[] { masterCacheKey });
         }
 
         private static string CreateCacheKey(ContentReference contentLink, string language, VirtualPathArguments args)
@@ -105,6 +106,16 @@ namespace Solita.Episerver.Performance.Routing
             }
 
             return key;
+        }
+
+        private static string CreateMasterCacheKey(ContentReference contentLink)
+        {
+            return "Solita:CachingUrlResolver.Master" + $"/{contentLink}";
+        }
+
+        public static void RemoveFromCache(ContentReference contentLink)
+        {
+            _cache.Remove(CreateMasterCacheKey(contentLink));
         }
     }
 }
