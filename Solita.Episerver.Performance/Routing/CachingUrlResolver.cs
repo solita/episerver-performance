@@ -32,8 +32,11 @@ namespace Solita.Episerver.Performance.Routing
                                   IContentLanguageSettingsHandler contentLanguageSettingsHandler,
                                   IContentCacheKeyCreator cacheKeyCreator,
                                   IContentCacheVersion cacheVersion,
-                                  IObjectInstanceCache cache)
-            : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper, contentLanguageSettingsHandler)
+                                  IObjectInstanceCache cache,
+                                  IContentUrlCache contentUrlCache,
+                                  IContextModeResolver contextModeResolver,
+                                  IRequestHostResolver requestHostResolver)
+            : base(routes, contentLoader, siteDefinitionRepository, templateResolver, permanentLinkMapper, contentLanguageSettingsHandler, contentUrlCache, contextModeResolver, requestHostResolver)
         {
             _cache = cache;
             _cacheVersion = cacheVersion;
